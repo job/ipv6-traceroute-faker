@@ -19,6 +19,6 @@ Route the subnet to your linux machine which runs the script and launch it:
 
 test with:
 
-    sudo tracroute6 -I $ipv6_destination
+    sudo traceroute6 -I $ipv6_destination
     mtr $ipv6_destination
 
