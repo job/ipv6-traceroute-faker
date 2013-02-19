@@ -17,3 +17,8 @@ Route the subnet to your linux machine which runs the script and launch it:
 
     sudo python ./ipv6-traceroute-faker.py
 
+test with:
+
+    sudo tracroute6 -I $ipv6_destination
+    mtr $ipv6_destination
+
