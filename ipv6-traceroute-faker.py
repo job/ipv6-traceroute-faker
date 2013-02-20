@@ -7,7 +7,7 @@
 # ip6tables -t raw -A PREROUTING -d 2a02:d28:601:1::/64 -j NFQUEUE --queue-num 0
 # further more we need root privileges 
 #
-# apt-get install python-scapy memcached python-memcache
+# apt-get install python-scapy memcached python-memcache libnetfilter-queue-dev python-nfqueue
 # pip install NetfilterQueue
 # 
 # Inner workings:
