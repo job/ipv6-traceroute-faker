@@ -8,7 +8,6 @@
 # further more we need root privileges 
 #
 # apt-get install python-scapy memcached python-memcache libnetfilter-queue-dev python-nfqueue
-# pip install NetfilterQueue
 # 
 # Inner workings:
 # we attach to a netfilterqueue and throw every packet at the form_reply def

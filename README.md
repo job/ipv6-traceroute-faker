@@ -11,7 +11,6 @@ Install:
 --------
 
     sudo apt-get install python-scapy memcached python-memcache libnetfilter-queue-dev python-nfqueue
-    sudo pip install NetfilterQueue
     sudo ip6tables -t raw -A PREROUTING -d 2a02:d28:601:1::/64 -j NFQUEUE --queue-num 0
 
 Edit the values at the top of the script to reflect your prefix and destination!
