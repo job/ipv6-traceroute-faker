@@ -10,8 +10,8 @@ entries :-)
 Install:
 --------
 
-    sudo apt-get install python-scapy memcached python-memcache libnetfilter-queue-dev python-nfqueue
-    sudo ip6tables -t raw -A PREROUTING -d 2a02:d28:601:1::/64 -j NFQUEUE --queue-num 0
+    sudo apt-get install python-scapy libnetfilter-queue-dev python-nfqueue
+    sudo ip6tables -t raw -A PREROUTING -d 2a02:898:52:666::/64 -j NFQUEUE --queue-num 0
 
 Edit the values at the top of the script to reflect your prefix and destination!
 
@@ -21,11 +21,13 @@ Route the subnet to your linux machine which runs the script and launch it:
 
 test with:
 
-    sudo traceroute6 -I $ipv6_destination
-    mtr $ipv6_destination
+    $ sudo traceroute6 -I $ipv6_destination
+    $ mtr -w -r -c 1 $ipv6_destination
 
 Example:
 --------
+
+    (Example is outdated, I now work for another employer ;-)
 
     job@intouch01.ring.nlnog.net:~$ mtr -w -c 1 -r 2a02:d28:601:1::ffff
     HOST: intouch01.ring.nlnog.net                                                         Loss%   Snt   Last   Avg  Best  Wrst StDev
