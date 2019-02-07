@@ -53,6 +53,7 @@ import asyncore
 from nfqueue import queue, NFQNL_COPY_PACKET
 from socket import AF_INET6
 from scapy.all import IPv6, TCP, UDP, ICMPv6TimeExceeded, ICMPv6EchoReply, ICMPv6EchoRequest, ICMPv6DestUnreach, send
+import time
 
 
 def do_callback(payload):
@@ -96,7 +97,7 @@ def do_callback(payload):
                 elif icmp == None and response != None:
                     send(reply/response, verbose=0)
             except UnboundLocalError:
-                print('meh')
+                print(time.ctime() + ': UnboundLocalError')
                 pass
 
 
@@ -111,7 +112,7 @@ class AsyncNfQueue(asyncore.file_dispatcher):
         self._q.set_mode(NFQNL_COPY_PACKET)
 
     def handle_read(self):
-        print('Processing at most 50 events')
+        print(time.ctime() + ': Processing at most 50 events')
         self._q.process_pending(50)
 
     def writable(self):
