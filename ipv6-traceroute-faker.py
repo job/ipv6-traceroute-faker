@@ -52,27 +52,51 @@ path_length = 19
 import asyncore
 from nfqueue import queue, NFQNL_COPY_PACKET
 from socket import AF_INET6
-from scapy.all import IPv6, ICMPv6TimeExceeded, send
+from scapy.all import IPv6, TCP, UDP, ICMPv6TimeExceeded, ICMPv6EchoReply, ICMPv6EchoRequest, ICMPv6DestUnreach, send
 
 
 def do_callback(payload):
     data = payload.get_data()
     pkt = IPv6(data)
     if pkt.version == 6:
-        if pkt.nh == 58:
+        if pkt.nh == 58 or pkt.nh == 17 or pkt.nh == 6:
+            # Significant packet received - ICMPv6 / UDP / TCP
             reply = IPv6()
             reply.dst = pkt[IPv6].src
             hl = pkt[IPv6].hlim
-            if hl == path_length:
-                reply.src = destination
-            else:
+            icmp = None
+            response = None
+            if hl < path_length:
+                icmp = ICMPv6TimeExceeded()
+                icmp.code = 0
                 reply.src = "%s%s" % (prefix, hl)
-            icmp = ICMPv6TimeExceeded()
-            icmp.code = 0
+            else:
+                # Packet with hlim >= path_length received. 'Destination' reached.
+                reply.src = destination
+                if isinstance(pkt[1], ICMPv6EchoRequest):
+                    # Reply to the ping
+                    response = ICMPv6EchoReply()
+                    response.id = pkt[1].id
+                    response.seq = pkt[1].seq
+                    response.data = pkt[1].data
+                if isinstance(pkt[1], TCP) and pkt[1].flags == 'S':
+                    # Reject the TCP SYN
+                    response = TCP()
+                    response.sport = pkt[1].dport
+                    response.dport = pkt[1].sport
+                    response.seq = pkt[1].seq
+                    response.flags = 'R'
+                if isinstance(pkt[1], UDP):
+                    # Reject the UDP pkt with ICMPv6 port unreachable
+                    icmp = ICMPv6DestUnreach()
+                    icmp.code = 4
             try:
-                send(reply/icmp/pkt, verbose=0)
+                if icmp != None and response == None:
+                    send(reply/icmp/pkt, verbose=0)
+                elif icmp == None and response != None:
+                    send(reply/response, verbose=0)
             except UnboundLocalError:
-                print "meh"
+                print('meh')
                 pass
 
 
@@ -87,7 +111,7 @@ class AsyncNfQueue(asyncore.file_dispatcher):
         self._q.set_mode(NFQNL_COPY_PACKET)
 
     def handle_read(self):
-        print "Processing at most 50 events"
+        print('Processing at most 50 events')
         self._q.process_pending(50)
 
     def writable(self):
