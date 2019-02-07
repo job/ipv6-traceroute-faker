@@ -68,29 +68,20 @@ def do_callback(payload):
             icmp = None
             response = None
             if hl < path_length:
-                icmp = ICMPv6TimeExceeded()
-                icmp.code = 0
+                icmp = ICMPv6TimeExceeded(code=0)
                 reply.src = "%s%s" % (prefix, hl)
             else:
                 # Packet with hlim >= path_length received. 'Destination' reached.
                 reply.src = destination
                 if isinstance(pkt[1], ICMPv6EchoRequest):
                     # Reply to the ping
-                    response = ICMPv6EchoReply()
-                    response.id = pkt[1].id
-                    response.seq = pkt[1].seq
-                    response.data = pkt[1].data
+                    response = ICMPv6EchoReply(id=pkt[1].id, seq=pkt[1].seq, data=pkt[1].data)
                 if isinstance(pkt[1], TCP) and pkt[1].flags == 'S':
                     # Reject the TCP SYN
-                    response = TCP()
-                    response.sport = pkt[1].dport
-                    response.dport = pkt[1].sport
-                    response.seq = pkt[1].seq
-                    response.flags = 'R'
+                    response = TCP(sport=pkt[1].dport, dport=pkt[1].sport, seq=pkt[1].seq, flags='R')
                 if isinstance(pkt[1], UDP):
                     # Reject the UDP pkt with ICMPv6 port unreachable
-                    icmp = ICMPv6DestUnreach()
-                    icmp.code = 4
+                    icmp = ICMPv6DestUnreach(code=4)
             try:
                 if icmp != None and response == None:
                     send(reply/icmp/pkt, verbose=0)
